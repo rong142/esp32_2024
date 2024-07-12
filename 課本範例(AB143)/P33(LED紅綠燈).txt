@@ -1,0 +1,20 @@
+//¬õºñ¿O½d¨Ò
+void setup() { 
+  pinMode(15,OUTPUT);//ºñLED¸}¦ì
+  pinMode(2,OUTPUT);//¶ÀLED¸}¦ì
+  pinMode(4,OUTPUT);//¬õLED¸}¦ì
+}
+void loop() {
+  //¶}ºñ¿O5¬í
+  digitalWrite(15,HIGH);//¶}ºñ¿O
+  delay(5000);//¥ð®§5¬í
+  //Ãöºñ¿O¡A¨Ã¶}¶À¿O1¬í
+  digitalWrite(15,LOW);//Ãöºñ¿O
+  digitalWrite(2,HIGH);//¶}¶À¿O
+  delay(1000);//¥ð®§1¬í
+  //Ãö¶À¿O¡A¨Ã¶}¬õ¿O3¬í
+  digitalWrite(2,LOW);//Ãö¶À¿O
+  digitalWrite(4,HIGH);//¶}¬õ¿O
+  delay(3000);//¥ð®§3¬í
+  digitalWrite(4,LOW);//Ãö¬õ¿O
+}

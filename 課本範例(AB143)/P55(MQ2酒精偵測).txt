@@ -1,0 +1,10 @@
+void setup() {
+  Serial.begin(115200);
+  pinMode(36, INPUT);//GPIO 36作為MQ2氣體感測輸入
+}
+
+void loop() {
+  int GasValue = analogRead(36);//讀取的數值放在變數：GasValue
+  Serial.println(GasValue); //GasValue顯示在序列視窗
+  delay(100);
+}

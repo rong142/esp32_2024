@@ -1,0 +1,37 @@
+//將三顆LED接在GPIO 15,2,4
+//將光敏電阻接在GPIO 36
+void setup() {
+  Serial.begin(115200);
+  pinMode(15, OUTPUT);//LED 1
+  pinMode(2, OUTPUT);//LED 2
+  pinMode(4, OUTPUT);//LED 3
+  pinMode(36, INPUT);//光敏電阻AO
+}
+void loop() {
+  int value = analogRead(36);//類比讀取腳位36
+  if (value >=2000) {
+    //現場亮度很低，LED全開
+    digitalWrite(15,HIGH);//開啟LED 1
+    digitalWrite(2,HIGH);//開啟LED 2
+    digitalWrite(4,HIGH);//開啟LED 3
+  }
+  else if (value >=1000) {
+    //現場亮度低，開啟2顆LED
+    digitalWrite(15,HIGH);//開啟LED 1
+    digitalWrite(2,HIGH);//開啟LED 2
+    digitalWrite(4,LOW);//關閉LED 3
+  }
+  else if (value >=500) {
+    //現場亮度普通，開啟1顆LED
+    digitalWrite(15,HIGH);//開啟LED 1
+    digitalWrite(2,LOW);//關閉LED 2
+    digitalWrite(4,LOW);//關閉LED 3
+  }
+  else {
+    //現場亮度優良，LED全關閉
+    digitalWrite(15,LOW);//關閉LED 1
+    digitalWrite(2,LOW);//關閉LED 2
+    digitalWrite(4,LOW);//關閉LED 3
+  }
+  delay(100);//每0.1秒鐘感測一次
+}

@@ -1,0 +1,30 @@
+#include <SimpleDHT.h>
+#include <BluetoothSerial.h>
+BluetoothSerial BT;
+int pinDHT11 = 4; //本例請將溫度計S腳接在GPIO 4
+SimpleDHT11 dht11(pinDHT11);
+
+void setup() {
+  Serial.begin(115200);
+  BT.begin("Eric1030");//請改名
+}
+
+void loop() {
+  // start working...
+  Serial.println("=================================");
+  Serial.println("Sample DHT11...");
+  // read without samples.
+  byte temperature = 0;
+  byte humidity = 0;
+  int err = SimpleDHTErrSuccess;
+  if ((err = dht11.read(&temperature, &humidity, NULL)) != SimpleDHTErrSuccess) {
+    Serial.print("Read DHT11 failed, err="); Serial.println(err); delay(1000);
+    return;
+  }
+  //將溫濕度傳輸到藍芽裝置
+  BT.print((int)temperature);
+  BT.print(" *C,");
+  BT.print((int)humidity);
+  BT.println(" H");
+  delay(1500); //休息1.5秒，如設定1秒可能會導致DHT11取樣時間太短而讀取失敗
+}

@@ -1,0 +1,19 @@
+void setup() {
+  Serial.begin(115200);
+  pinMode(15, OUTPUT);
+}
+
+void loop() {
+  Serial.println("由暗變亮");
+  for (int i = 0; i <= 255; i++) {
+    analogWrite(15, i);//亮度i從0->255
+    delay(10);
+  }
+  delay(1000);
+  Serial.println("由亮變暗");
+  for (int i = 255; i >= 0; i--) {
+    analogWrite(15, i); //亮度i從255->0
+    delay(10);
+  }
+  delay(1000);
+}

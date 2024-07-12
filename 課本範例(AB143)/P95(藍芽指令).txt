@@ -1,0 +1,42 @@
+#include <BluetoothSerial.h>
+BluetoothSerial BT;
+
+void setup() {
+  Serial.begin(115200);
+  BT.begin("Eric1030");//請改名
+  pinMode(15, OUTPUT); //綠色LED
+  pinMode(2, OUTPUT); //黃色LED
+  pinMode(4, OUTPUT); //紅色LED
+}
+
+void loop() {
+  //檢查序列內是否有資料
+  while (Serial.available()) {
+    //讀取序列資料
+    String Sdata = Serial.readString();
+    //傳輸給藍芽
+    BT.print(Sdata);
+  }
+
+  //檢查藍芽內是否有資料
+  while (BT.available()) {
+    //讀取藍芽資料
+    String BTdata = BT.readString();
+    //顯示在序列視窗
+    Serial.println(BTdata);
+    //檢查藍芽資料及相對的指令
+    //接收到"1"：開綠燈
+    if (BTdata == "1") { digitalWrite(15, HIGH); }
+    //接收到"2"：關綠燈
+    if (BTdata == "2") { digitalWrite(15, LOW); }
+    //接收到"3"：開黃燈
+    if (BTdata == "3") { digitalWrite(2, HIGH); }
+    //接收到"4"：關黃燈
+    if (BTdata == "4") { digitalWrite(2, LOW); }
+    //接收到"5"：開紅燈
+    if (BTdata == "5") { digitalWrite(4, HIGH); }
+    //接收到"6"：關紅燈
+    if (BTdata == "6") { digitalWrite(4, LOW); }
+  }
+  delay(1);
+}

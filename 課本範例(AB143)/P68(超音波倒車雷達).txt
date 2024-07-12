@@ -1,0 +1,33 @@
+#include <ESP32Servo.h>
+int Trig = 12; //發出聲波
+int Echo = 14; //接收聲波
+int buzzer = 17;//蜂鳴器
+void setup() {
+  Serial.begin(115200);
+  pinMode(Trig, OUTPUT);
+  pinMode(Echo, INPUT);
+  pinMode(buzzer, OUTPUT);
+}
+
+void loop() {
+  //步驟1：使用超音波測量距離
+  digitalWrite(Trig, LOW); //關閉
+  delayMicroseconds(5);
+  digitalWrite(Trig, HIGH);//啟動
+  delayMicroseconds(10);
+  digitalWrite(Trig, LOW); //關閉
+  float EchoTime = pulseIn(Echo, HIGH); //傳回時間
+  float CMValue = EchoTime / 29.4 / 2; //轉換成距離
+  Serial.println(CMValue);
+  //步驟2：使用蜂鳴器發出指定聲音
+  if (CMValue < 100 && CMValue >= 50) {
+    tone(buzzer, 65, 100); //注意：發出低音Do
+  }
+  if (CMValue < 50 && CMValue >= 10) {
+    tone(buzzer, 523, 100); //小心：發出中音Do
+  }
+  if (CMValue < 10) {
+    tone(buzzer, 4186, 100); //危險：發出高音Do
+  }
+  delay(50);
+}

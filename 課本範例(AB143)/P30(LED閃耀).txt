@@ -1,0 +1,11 @@
+//內建LED閃耀範例
+void setup() {
+  pinMode(2,OUTPUT);	//宣告腳位2(內建LED)做輸出用途
+}
+
+void loop() {
+  digitalWrite(2,HIGH);	//在腳位2輸出高電位(3.3V)
+  delay(1000);			//休息1秒
+  digitalWrite(2,LOW);	//在腳位2輸出低電位(0V)
+  delay(1000);			//休息1秒
+}

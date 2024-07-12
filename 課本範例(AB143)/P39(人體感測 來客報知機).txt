@@ -1,0 +1,19 @@
+//SR-501人體感測器OUT腳位接在GPIO17
+//ISD1820錄放音模組PLAYE腳位接在GPIO16
+void setup() {
+  Serial.begin(115200);
+  pinMode(17, INPUT);//SR-501
+  pinMode(16, OUTPUT);//ISD1820  
+}
+void loop() {
+  int value = digitalRead(17);
+  if (value == HIGH) {
+    Serial.println("有人經過");
+    digitalWrite(16, HIGH);//播放一次歡迎詞
+    delay(1000);//暫停一秒
+    digitalWrite(16, LOW);//關閉PLAYE，否則會一直播放
+  } else {
+    Serial.println("無人");
+  }
+  delay(500);//每半秒鐘感測一次
+}
