@@ -1,0 +1,102 @@
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEScan.h>
+#include <BLEAdvertisedDevice.h>
+
+#include <WiFiClientSecure.h>
+char ssid[] = "你的WiFi SSID"; 
+char password[] = "你的WiFi 密碼";
+String Linetoken = "你的Line權杖";
+WiFiClientSecure client;//網路連線物件
+char host[] = "notify-api.line.me";//LINE Notify API網址
+String BossBeacon = "老闆的Beacon";//例如我的手環為"c9:b6:3d:c4:5e:bd"
+boolean BossComing = false; //是否要發送Line通知
+
+int scanTime = 5; //In seconds
+BLEScan* pBLEScan;
+
+class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
+    void onResult(BLEAdvertisedDevice advertisedDevice) {
+      //印出Beacon裝置資訊
+      Serial.printf("Advertised Device: %s \n", advertisedDevice.
+                    toString().c_str());
+      //取得address
+      String Address = advertisedDevice.getAddress().toString().c_str();
+      Serial.print("Address:"); Serial.print(Address);
+      //取得RSSI
+      int RSSI = advertisedDevice.getRSSI();
+      Serial.print(",RSSI:"); Serial.println(RSSI);
+      //檢查老闆的Beacon是否進入範圍(RSSI>=-80)
+      if (Address == BossBeacon && RSSI >= -80) {
+        Serial.println("偵測到老闆的Beacon");
+        BossComing = true;
+      }
+    }
+};
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Scanning...");
+
+  BLEDevice::init(""); //初始化藍芽裝置
+  pBLEScan = BLEDevice::getScan(); //建立藍芽掃描裝置
+  //宣告掃描Callbacks副程式
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+  pBLEScan->setActiveScan(true); //使用主動掃描模式
+  pBLEScan->setInterval(100); //掃描間隔(100ms)
+  pBLEScan->setWindow(99); //掃描時窗(99ms)
+
+  //連線到指定WiFi
+  Serial.print("Connecting Wifi: ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  //連線成功，顯示取得的IP
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  IPAddress ip = WiFi.localIP();
+  Serial.println(ip);
+  client.setInsecure();
+}
+
+void loop() {
+  //開始掃描，並將結果存檔
+  BossComing = false;
+  BLEScanResults foundDevices = pBLEScan->start(scanTime, false);
+  Serial.print("Devices found: ");
+  Serial.println(foundDevices.getCount());//印出裝置數量
+  Serial.println("Scan done!");
+  pBLEScan->clearResults(); //刪除掃描結果
+  if (BossComing) {
+    //發送Line通知
+    String message = "大家注意，老闆回來了....";
+    Serial.println("Line訊息發送中:" + message);
+    if (client.connect(host, 443)) {
+      int LEN = message.length();
+      String url = "/api/notify";
+      client.println("POST " + url + " HTTP/1.1");
+      client.print("Host: "); client.println(host);
+      client.print("Authorization: Bearer "); client.println(Linetoken);
+      client.println("Content-Type: application/x-www-form-urlencoded");
+      client.print("Content-Length: "); client.println( String((LEN + 8)) );
+      client.println();
+      client.print("message="); client.println(message);
+      client.println();
+      //等候回應
+      delay(2000);
+      String response = client.readString();
+      //顯示傳遞結果
+      Serial.println(response);
+      client.stop(); //斷線，否則只能傳5次
+    }
+    else {
+      //傳送失敗
+      Serial.println("connected fail");
+    }
+  }
+  delay(2000);//暫停兩秒
+}

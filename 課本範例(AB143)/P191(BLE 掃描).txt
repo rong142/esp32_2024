@@ -1,0 +1,44 @@
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEScan.h>
+#include <BLEAdvertisedDevice.h>
+
+int scanTime = 5; //掃描時間5秒鐘
+BLEScan* pBLEScan; //建立藍芽掃描
+//Callbacks：當掃描到Beacon裝置時，會執行本副程式
+class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
+    void onResult(BLEAdvertisedDevice advertisedDevice) {
+      //印出Beacon裝置資訊
+      Serial.printf("Advertised Device:%s \n", advertisedDevice.toString().
+                    c_str());
+      //取得address
+      String Address = advertisedDevice.getAddress().toString().c_str();
+      Serial.print("Address:"); Serial.print(Address);
+      //取得RSSI
+      int RSSI = advertisedDevice.getRSSI();
+      Serial.print(",RSSI:"); Serial.println(RSSI);
+    }
+};
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Scanning...");
+
+  BLEDevice::init(""); //初始化藍芽裝置
+  pBLEScan = BLEDevice::getScan(); //建立藍芽掃描裝置
+  //宣告掃描Callbacks副程式
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+  pBLEScan->setActiveScan(true); //使用主動掃描模式
+  pBLEScan->setInterval(100); //掃描間隔(100ms)
+  pBLEScan->setWindow(99); //掃描時窗(99ms)
+}
+
+void loop() {
+  //開始掃描，並將結果存檔
+  BLEScanResults foundDevices = pBLEScan->start(scanTime, false);
+  Serial.print("Devices found: ");
+  Serial.println(foundDevices.getCount());//印出裝置數量
+  Serial.println("Scan done!");
+  pBLEScan->clearResults(); //刪除掃描結果
+  delay(2000);//暫停兩秒
+}

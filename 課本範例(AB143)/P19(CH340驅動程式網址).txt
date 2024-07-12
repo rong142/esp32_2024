@@ -1,0 +1,4 @@
+CH340驅動程式下載網址
+http://www.wch.cn/download/ch341ser_exe.html
+CP2102驅動程式下載網址
+https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers

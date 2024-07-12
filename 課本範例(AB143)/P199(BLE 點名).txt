@@ -1,0 +1,101 @@
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEScan.h>
+#include <BLEAdvertisedDevice.h>
+
+#include <WiFi.h>
+#include <HTTPClient.h>
+char ssid[] = "你的WiFi SSID";
+char password[] = "你的WiFi密碼";
+String url = "http://api.thingspeak.com/update?api_key=換成你的APIKey";
+#define WorkerNumber 4 //總員工人數
+int atWorkNumber = 0;  //工作中人數
+//員工的Beacon編號
+String WorkerBeacon[WorkerNumber] =
+  { "aa:aa:aa:aa:aa:aa",
+    "bb:bb:bb:bb:bb:bb",
+    "cc:cc:cc:cc:cc:cc",
+    "dd:dd:dd:dd:dd:dd" };
+
+int scanTime = 30; //In seconds
+BLEScan* pBLEScan;
+
+class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
+    void onResult(BLEAdvertisedDevice advertisedDevice) {
+      Serial.printf("Advertised Device: %s \n", advertisedDevice.toString().
+	                 c_str());
+      //取得address
+      String Address = advertisedDevice.getAddress().toString().c_str();
+      Serial.print("Address:"); Serial.print(Address);
+      //取得RSSI
+      int RSSI = advertisedDevice.getRSSI();
+      Serial.print(",RSSI:"); Serial.println(RSSI);
+      //檢查是否為本單位員工
+      for (int i = 0; i < WorkerNumber; i++) {
+        if ( WorkerBeacon[i] == Address && RSSI >= -80 ) {
+          Serial.println("現場員工+1");
+          atWorkNumber = atWorkNumber + 1;
+          break;
+        }
+      }
+    }
+};
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Scanning...");
+
+  BLEDevice::init(""); //初始化藍芽裝置
+  pBLEScan = BLEDevice::getScan(); //建立藍芽掃描裝置  
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());//宣告掃描Callbacks副程式
+  pBLEScan->setActiveScan(true); //使用主動掃描模式
+  pBLEScan->setInterval(100); //掃描間隔(100ms)
+  pBLEScan->setWindow(99); //掃描時窗(99ms)
+
+  //連線到指定WiFi
+  Serial.print("Connecting Wifi: ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  //連線成功，顯示取得的IP
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  IPAddress ip = WiFi.localIP();
+  Serial.println(ip);
+
+}
+
+void loop() {
+  atWorkNumber = 0;
+  BLEScanResults foundDevices = pBLEScan->start(scanTime, false);
+  Serial.print("Devices found: ");
+  Serial.println(foundDevices.getCount());
+  Serial.println("Scan done!");
+  pBLEScan->clearResults();
+  Serial.print("現場工作人數:");
+  Serial.println(atWorkNumber);
+  Serial.print("上傳ThingSpeak...");
+  HTTPClient http;
+  //人數以HTTP Get參數方式補入網址後方
+  String url1 = url + "&field1=" + atWorkNumber;
+  //http client取得網頁內容
+  http.begin(url1);
+  int httpCode = http.GET();
+  if (httpCode == HTTP_CODE_OK)      {
+    //讀取網頁內容到payload
+    String payload = http.getString();
+    //將內容顯示出來
+    Serial.print("網頁內容=");
+    Serial.println(payload);
+  } else {
+    //讀取失敗
+    Serial.println("網路傳送失敗");
+  }
+  http.end();
+
+  delay(2000);
+}
