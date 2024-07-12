@@ -1,0 +1,7 @@
+        ledcSetup(7, 50, 8);//設定類比輸出頻道7,50Hz,256(2^8)的解析度
+        ledcAttachPin(2, 7);//將上述的類比輸出頻道7附加在GPIO2上
+        Serial.println("發現白名單，開門");
+        ledcWrite(7, 18.56);//轉到角度90
+        delay(5000);//開門五秒鐘就直接關門
+        Serial.println("關門");
+        ledcWrite(7, 6.4);//轉到角度0

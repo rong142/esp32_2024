@@ -1,0 +1,8 @@
+void setup() {
+  Serial.begin(115200);//啟動序列通訊鮑率115200
+}
+
+void loop() {
+  Serial.println("Hello World!");//印出HelloWorld!
+  delay(1000);//休息1秒
+}

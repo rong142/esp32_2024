@@ -1,0 +1,16 @@
+#include <ESP32Servo.h> //請先安裝ESP32Servo程式庫
+Servo myServo; //建立一個伺服馬達物件
+void setup(){
+  //SG90的脈衝寬度500~2400 
+  myServo.attach(4, 500, 2400);  
+}
+void loop(){
+  myServo.write(90);//轉到90度
+  delay(1000);
+  myServo.write(180);//轉到180度
+  delay(1000);
+  myServo.write(90);//轉到90度
+  delay(1000);
+  myServo.write(0);//轉到0度（原點）
+  delay(5000);
+}

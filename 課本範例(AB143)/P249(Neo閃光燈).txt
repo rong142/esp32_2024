@@ -1,0 +1,26 @@
+#include <Adafruit_NeoPixel.h>
+int NEOPin = 32; // 腳位編號
+int NEONumber = 1; // 燈組的數量（本例只有一顆）
+Adafruit_NeoPixel pixels(NEONumber, NEOPin, NEO_GRB + NEO_KHZ800);
+// 設定規格
+void setup() {
+pixels.begin(); // 初始化燈組
+}
+void loop() {
+// 設定WS2812 燈組 燈編號 顏色（R, G, B）組合
+pixels.setPixelColor(0, pixels.Color(255, 255, 255)); // 白色
+pixels.show(); // 依照設定顯示
+delay(500);
+pixels.setPixelColor(0, pixels.Color(255, 0, 0)); // 紅色
+pixels.show();
+delay(500);
+pixels.setPixelColor(0, pixels.Color(0, 255, 0)); // 綠色
+pixels.show();
+delay(500);
+pixels.setPixelColor(0, pixels.Color(0, 0, 255)); // 藍色
+pixels.show();
+delay(500);
+pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // 關燈
+pixels.show();
+delay(500);
+}
